@@ -8,6 +8,7 @@ import TransactionsScreen from './src/screens/TransactionsScreen';
 import MarketScreen from './src/screens/MarketScreen';
 import ChartsScreen from './src/screens/ChartsScreen';
 import SettingsScreen from './src/screens/SettingsScreen';
+import COLORS from './src/theme/colors';
 
 const options = {
   headerShown: false,
@@ -21,26 +22,61 @@ enableScreens(false);
 export default function App() {
   return (
     <NavigationContainer>
-      <Tab.Navigator>
+      <Tab.Navigator
+        screenOptions={{
+          tabBarActiveTintColor: COLORS.primary,
+          tabBarInactiveTintColor: COLORS.secondary,
+        }}
+      >
         <Tab.Screen name="Dashboard" component={DashboardScreen}
           options={{
-            tabBarIcon: (focused, color, size = 19) => (<Ionicons name="home" size={size} color={color} />),
+            tabBarIcon: ({ focused, size = 19 }) => (
+              <Ionicons
+                name="home"
+                size={size}
+                color={focused ? COLORS.primary : COLORS.secondary}
+              />
+            ),
             tabBarLabel: "Ana Sayfa"
           }} />
         <Tab.Screen name="İşlemler" component={TransactionsScreen} options={{
-          tabBarIcon: (focused, color, size = 20) => (<Ionicons name="list" size={size} color={color} />),
+          tabBarIcon: ({ focused, size = 20 }) => (
+            <Ionicons
+              name="list"
+              size={size}
+              color={focused ? COLORS.primary : COLORS.secondary}
+            />
+          ),
           tabBarLabel: "İşlemler"
         }} />
         <Tab.Screen name="Piyasa" component={MarketScreen} options={{
-          tabBarIcon: (focused, color, size = 20) => (<Ionicons name="trending-up" size={size} color={color} />),
+          tabBarIcon: ({ focused, size = 20 }) => (
+            <Ionicons
+              name="trending-up"
+              size={size}
+              color={focused ? COLORS.primary : COLORS.secondary}
+            />
+          ),
           tabBarLabel: "Ana Sayfa"
         }} />
         <Tab.Screen name="Grafikler" component={ChartsScreen} options={{
-          tabBarIcon: (focused, color, size = 20) => (<Ionicons name="bar-chart" size={size} color={color} />),
+          tabBarIcon: ({ focused, size = 20 }) => (
+            <Ionicons
+              name="bar-chart"
+              size={size}
+              color={focused ? COLORS.primary : COLORS.secondary}
+            />
+          ),
           tabBarLabel: "Grafikler"
         }} />
         <Tab.Screen name="Ayarlar" component={SettingsScreen} options={{
-          tabBarIcon: (focused, color, size = 20) => (<Ionicons name="settings" size={size} color={color} />),
+          tabBarIcon: ({ focused, size = 20 }) => (
+            <Ionicons
+              name="settings"
+              size={size}
+              color={focused ? COLORS.primary : COLORS.secondary}
+            />
+          ),
           tabBarLabel: "Ayarlar"
         }} />
 
