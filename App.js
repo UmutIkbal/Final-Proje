@@ -8,24 +8,25 @@ import TransactionsScreen from './src/screens/TransactionsScreen';
 import MarketScreen from './src/screens/MarketScreen';
 import ChartsScreen from './src/screens/ChartsScreen';
 import SettingsScreen from './src/screens/SettingsScreen';
-import COLORS from './src/theme/colors';
+import { CategoriesProvider } from './src/context/CategoriesContext';
+import { ThemeProvider, useTheme } from './src/context/ThemeContext';
 
-const options = {
-  headerShown: false,
-  tabBarShowLabel: false,
-};
-const Tab = createBottomTabNavigator(options)
+const Tab = createBottomTabNavigator();
 
 enableScreens(false);
 
+function AppContent() {
+  const { colors } = useTheme();
 
-export default function App() {
   return (
     <NavigationContainer>
       <Tab.Navigator
         screenOptions={{
-          tabBarActiveTintColor: COLORS.primary,
-          tabBarInactiveTintColor: COLORS.secondary,
+          headerShown: false,
+          tabBarShowLabel: true,
+          tabBarActiveTintColor: colors.primary,
+          tabBarInactiveTintColor: colors.secondary,
+          tabBarStyle: { backgroundColor: colors.surface },
         }}
       >
         <Tab.Screen name="Dashboard" component={DashboardScreen}
@@ -34,7 +35,7 @@ export default function App() {
               <Ionicons
                 name="home"
                 size={size}
-                color={focused ? COLORS.primary : COLORS.secondary}
+                color={focused ? colors.primary : colors.secondary}
               />
             ),
             tabBarLabel: "Ana Sayfa"
@@ -44,7 +45,7 @@ export default function App() {
             <Ionicons
               name="list"
               size={size}
-              color={focused ? COLORS.primary : COLORS.secondary}
+              color={focused ? colors.primary : colors.secondary}
             />
           ),
           tabBarLabel: "İşlemler"
@@ -54,7 +55,7 @@ export default function App() {
             <Ionicons
               name="trending-up"
               size={size}
-              color={focused ? COLORS.primary : COLORS.secondary}
+              color={focused ? colors.primary : colors.secondary}
             />
           ),
           tabBarLabel: "Ana Sayfa"
@@ -64,7 +65,7 @@ export default function App() {
             <Ionicons
               name="bar-chart"
               size={size}
-              color={focused ? COLORS.primary : COLORS.secondary}
+              color={focused ? colors.primary : colors.secondary}
             />
           ),
           tabBarLabel: "Grafikler"
@@ -74,14 +75,22 @@ export default function App() {
             <Ionicons
               name="settings"
               size={size}
-              color={focused ? COLORS.primary : COLORS.secondary}
+              color={focused ? colors.primary : colors.secondary}
             />
           ),
           tabBarLabel: "Ayarlar"
         }} />
-
-
       </Tab.Navigator>
     </NavigationContainer>
+  );
+}
+
+export default function App() {
+  return (
+    <ThemeProvider>
+      <CategoriesProvider>
+        <AppContent />
+      </CategoriesProvider>
+    </ThemeProvider>
   );
 }
