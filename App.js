@@ -9,6 +9,7 @@ import MarketScreen from './src/screens/MarketScreen';
 import ChartsScreen from './src/screens/ChartsScreen';
 import SettingsScreen from './src/screens/SettingsScreen';
 import { CategoriesProvider } from './src/context/CategoriesContext';
+import { TransactionsProvider } from './src/context/TransactionsContext';
 import { ThemeProvider, useTheme } from './src/context/ThemeContext';
 
 const Tab = createBottomTabNavigator();
@@ -89,7 +90,9 @@ export default function App() {
   return (
     <ThemeProvider>
       <CategoriesProvider>
-        <AppContent />
+        <TransactionsProvider>
+          <AppContent />
+        </TransactionsProvider>
       </CategoriesProvider>
     </ThemeProvider>
   );

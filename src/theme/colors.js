@@ -5,6 +5,8 @@ export const lightColors = {
   surface: '#f3f4f6',
   primarySoft: '#e0f0e7',
   text: '#0f172a',
+  income: '#0f7a4f',
+  expense: '#b42318',
 };
 
 export const darkColors = {
@@ -14,4 +16,6 @@ export const darkColors = {
   surface: '#141c19',
   primarySoft: '#1f322a',
   text: '#e5e7eb',
+  income: '#7ae7b4',
+  expense: '#f97066',
 };

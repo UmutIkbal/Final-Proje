@@ -1,5 +1,5 @@
 import { useMemo, useState } from 'react';
-import { StyleSheet, Text, TextInput, View, Pressable } from 'react-native';
+import { Keyboard, ScrollView, StyleSheet, Text, TextInput, View, Pressable } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useCategories } from '../context/CategoriesContext';
 import { useTheme } from '../context/ThemeContext';
@@ -19,6 +19,10 @@ export default function SettingsScreen() {
   const clearDeleteButtons = () => {
     setShowDeleteGroup('');
     setShowDeleteCategory('');
+  };
+  const dismissAll = () => {
+    Keyboard.dismiss();
+    clearDeleteButtons();
   };
 
   const handleAddGroup = () => {
@@ -74,74 +78,128 @@ export default function SettingsScreen() {
 
   return (
     <SafeAreaView style={styles.container}>
-      <Pressable style={styles.content} onPress={clearDeleteButtons}>
+      <ScrollView
+        contentContainerStyle={styles.scrollContent}
+        keyboardShouldPersistTaps="handled"
+        keyboardDismissMode="on-drag"
+        onTouchStart={dismissAll}
+      >
+        <View style={styles.content}>
         {/* Ekran basligi */}
         <Text style={styles.title}>Ayarlar</Text>
 
         <View style={styles.section}>
-        {/* Tema degistirme alani */}
-        <View style={styles.toggleRow}>
-          <Text style={styles.toggleLabel}>Karanlik Mod</Text>
-          <Pressable
-            onPress={toggleTheme}
-            style={({ pressed }) => [
-              styles.toggleButton,
-              isDark && styles.toggleButtonActive,
-              pressed && styles.buttonPressed,
-            ]}
-          >
-            <Ionicons
-              name={isDark ? 'sunny' : 'moon'}
-              size={18}
-              color={colors.primary}
-            />
-          </Pressable>
-        </View>
-
-        {/* Kategori yonetimi basligi */}
-        <Text style={styles.sectionTitle}>Kategori Yonetimi</Text>
-
-        <View style={styles.row}>
-          {/* Yeni grup girisi */}
-          <TextInput
-            style={styles.input}
-            placeholder="Grup ekle (Orn. Abonelik)"
-            placeholderTextColor={colors.secondary}
-            value={newGroup}
-            onChangeText={setNewGroup}
-          />
-          {/* Grup ekle butonu */}
-          <Pressable
-            onPress={handleAddGroup}
-            style={({ pressed }) => [
-              styles.button,
-              pressed && styles.buttonPressed,
-            ]}
-          >
-            <Text style={styles.buttonText}>Ekle</Text>
-          </Pressable>
-        </View>
-
-        <View style={styles.groupRow}>
-          {/* Grup secim chipleri */}
-          {groups.map((item) => (
+          {/* Tema degistirme alani */}
+          <View style={styles.toggleRow}>
+            <Text style={styles.toggleLabel}>Karanlik Mod</Text>
             <Pressable
-              key={item.name}
+              onPress={toggleTheme}
               style={({ pressed }) => [
-                styles.chip,
-                selectedGroup === item.name && styles.chipActive,
-                pressed && styles.chipPressed,
+                styles.toggleButton,
+                isDark && styles.toggleButtonActive,
+                pressed && styles.buttonPressed,
               ]}
-              onPress={() => setSelectedGroup(item.name)}
-              onLongPress={() => setShowDeleteGroup(item.name)}
             >
-              <View style={styles.chipRow}>
-                <Text style={[styles.chipText, selectedGroup === item.name && styles.chipTextActive]}>
-                  {item.name}
-                </Text>
-                {showDeleteGroup === item.name && (
+              <Ionicons
+                name={isDark ? 'sunny' : 'moon'}
+                size={18}
+                color={colors.primary}
+              />
+            </Pressable>
+          </View>
+
+          {/* Kategori yonetimi basligi */}
+          <Text style={styles.sectionTitle}>Kategori Yonetimi</Text>
+
+          <View style={styles.row}>
+            {/* Yeni grup girisi */}
+            <TextInput
+              style={styles.input}
+              placeholder="Grup ekle (Orn. Abonelik)"
+              placeholderTextColor={colors.secondary}
+              value={newGroup}
+              onChangeText={setNewGroup}
+            />
+            {/* Grup ekle butonu */}
+            <Pressable
+              onPress={handleAddGroup}
+              style={({ pressed }) => [
+                styles.button,
+                pressed && styles.buttonPressed,
+              ]}
+            >
+              <Text style={styles.buttonText}>Ekle</Text>
+            </Pressable>
+          </View>
+
+          <View style={styles.groupRow}>
+            {/* Grup secim chipleri */}
+            {groups.map((item) => (
+              <Pressable
+                key={item.name}
+                style={({ pressed }) => [
+                  styles.chip,
+                  selectedGroup === item.name && styles.chipActive,
+                  pressed && styles.chipPressed,
+                ]}
+                onPress={() => setSelectedGroup(item.name)}
+                onLongPress={() => setShowDeleteGroup(item.name)}
+              >
+                <View style={styles.chipRow}>
+                  <Text style={[styles.chipText, selectedGroup === item.name && styles.chipTextActive]}>
+                    {item.name}
+                  </Text>
+                  {showDeleteGroup === item.name && (
+                    <Pressable
+                      onPress={() => handleDeleteGroup(item.name)}
+                      style={({ pressed }) => [
+                        styles.deleteButton,
+                        pressed && styles.deletePressed,
+                      ]}
+                    >
+                      <Text style={styles.deleteText}>Sil</Text>
+                    </Pressable>
+                  )}
+                </View>
+              </Pressable>
+            ))}
+          </View>
+
+          <View style={styles.row}>
+            {/* Yeni kategori girisi */}
+            <TextInput
+              style={styles.input}
+              placeholder="Kategori ekle (Orn. Netflix)"
+              placeholderTextColor={colors.secondary}
+              value={newCategory}
+              onChangeText={setNewCategory}
+            />
+            {/* Kategori ekle butonu */}
+            <Pressable
+              onPress={handleAddCategory}
+              disabled={!selectedGroup}
+              style={({ pressed }) => [
+                styles.button,
+                !selectedGroup && styles.buttonDisabled,
+                pressed && styles.buttonPressed,
+              ]}
+            >
+              <Text style={styles.buttonText}>Ekle</Text>
+            </Pressable>
+          </View>
+
+          <View style={styles.categoryList}>
+            {/* Secili gruba ait kategori listesi */}
+            {(groups.find((g) => g.name === selectedGroup)?.categories || []).map((item) => (
+              <Pressable
+                key={item}
+                style={styles.categoryRow}
+                onLongPress={() => setShowDeleteCategory(item)}
+              >
+                <Text style={styles.categoryItem}>{item}</Text>
+                {showDeleteCategory === item && (
                   <Pressable
-                    onPress={() => handleDeleteGroup(item.name)}
+                    onPress={() => handleDeleteCategory(item)}
                     style={({ pressed }) => [
                       styles.deleteButton,
                       pressed && styles.deletePressed,
@@ -150,59 +208,12 @@ export default function SettingsScreen() {
                     <Text style={styles.deleteText}>Sil</Text>
                   </Pressable>
                 )}
-              </View>
-            </Pressable>
-          ))}
+              </Pressable>
+            ))}
+          </View>
         </View>
-
-        <View style={styles.row}>
-          {/* Yeni kategori girisi */}
-          <TextInput
-            style={styles.input}
-            placeholder="Kategori ekle (Orn. Netflix)"
-            placeholderTextColor={colors.secondary}
-            value={newCategory}
-            onChangeText={setNewCategory}
-          />
-          {/* Kategori ekle butonu */}
-          <Pressable
-            onPress={handleAddCategory}
-            disabled={!selectedGroup}
-            style={({ pressed }) => [
-              styles.button,
-              !selectedGroup && styles.buttonDisabled,
-              pressed && styles.buttonPressed,
-            ]}
-          >
-            <Text style={styles.buttonText}>Ekle</Text>
-          </Pressable>
-        </View>
-
-        <View style={styles.categoryList}>
-          {/* Secili gruba ait kategori listesi */}
-          {(groups.find((g) => g.name === selectedGroup)?.categories || []).map((item) => (
-            <Pressable
-              key={item}
-              style={styles.categoryRow}
-              onLongPress={() => setShowDeleteCategory(item)}
-            >
-              <Text style={styles.categoryItem}>{item}</Text>
-              {showDeleteCategory === item && (
-                <Pressable
-                  onPress={() => handleDeleteCategory(item)}
-                  style={({ pressed }) => [
-                    styles.deleteButton,
-                    pressed && styles.deletePressed,
-                  ]}
-                >
-                  <Text style={styles.deleteText}>Sil</Text>
-                </Pressable>
-              )}
-            </Pressable>
-          ))}
-        </View>
-        </View>
-      </Pressable>
+      </View>
+      </ScrollView>
     </SafeAreaView>
   );
 }
@@ -210,9 +221,6 @@ export default function SettingsScreen() {
 const createStyles = (colors) => StyleSheet.create({
   container: {
     flex: 1,
-    paddingHorizontal: 20,
-    paddingTop: 16,
-    paddingBottom: 28,
     backgroundColor: colors.background,
   },
   title: {
@@ -223,6 +231,12 @@ const createStyles = (colors) => StyleSheet.create({
   },
   section: {
     marginTop: 8,
+  },
+  scrollContent: {
+    flexGrow: 1,
+    paddingHorizontal: 20,
+    paddingTop: 16,
+    paddingBottom: 28,
   },
   content: {
     flex: 1,
