@@ -59,7 +59,7 @@ function AppContent() {
               color={focused ? colors.primary : colors.secondary}
             />
           ),
-          tabBarLabel: "Ana Sayfa"
+          tabBarLabel: "Piyasa"
         }} />
         <Tab.Screen name="Grafikler" component={ChartsScreen} options={{
           tabBarIcon: ({ focused, size = 20 }) => (

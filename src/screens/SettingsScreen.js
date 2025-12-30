@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react';
+import { useMemo, useRef, useState } from 'react';
 import { Keyboard, ScrollView, StyleSheet, Text, TextInput, View, Pressable } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useCategories } from '../context/CategoriesContext';
@@ -16,12 +16,20 @@ export default function SettingsScreen() {
   const [newCategory, setNewCategory] = useState('');
   const [showDeleteGroup, setShowDeleteGroup] = useState('');
   const [showDeleteCategory, setShowDeleteCategory] = useState('');
+  const longPressRef = useRef(false);
   const clearDeleteButtons = () => {
     setShowDeleteGroup('');
     setShowDeleteCategory('');
   };
   const dismissAll = () => {
     Keyboard.dismiss();
+    clearDeleteButtons();
+  };
+  const handleTouchEnd = () => {
+    if (longPressRef.current) {
+      longPressRef.current = false;
+      return;
+    }
     clearDeleteButtons();
   };
 
@@ -82,7 +90,8 @@ export default function SettingsScreen() {
         contentContainerStyle={styles.scrollContent}
         keyboardShouldPersistTaps="handled"
         keyboardDismissMode="on-drag"
-        onTouchStart={dismissAll}
+        onTouchStart={Keyboard.dismiss}
+        onTouchEnd={handleTouchEnd}
       >
         <View style={styles.content}>
         {/* Ekran basligi */}
@@ -142,9 +151,12 @@ export default function SettingsScreen() {
                   selectedGroup === item.name && styles.chipActive,
                   pressed && styles.chipPressed,
                 ]}
-                onPress={() => setSelectedGroup(item.name)}
-                onLongPress={() => setShowDeleteGroup(item.name)}
-              >
+              onPress={() => setSelectedGroup(item.name)}
+              onLongPress={() => {
+                longPressRef.current = true;
+                setShowDeleteGroup(item.name);
+              }}
+            >
                 <View style={styles.chipRow}>
                   <Text style={[styles.chipText, selectedGroup === item.name && styles.chipTextActive]}>
                     {item.name}
@@ -193,9 +205,12 @@ export default function SettingsScreen() {
             {(groups.find((g) => g.name === selectedGroup)?.categories || []).map((item) => (
               <Pressable
                 key={item}
-                style={styles.categoryRow}
-                onLongPress={() => setShowDeleteCategory(item)}
-              >
+              style={styles.categoryRow}
+              onLongPress={() => {
+                longPressRef.current = true;
+                setShowDeleteCategory(item);
+              }}
+            >
                 <Text style={styles.categoryItem}>{item}</Text>
                 {showDeleteCategory === item && (
                   <Pressable

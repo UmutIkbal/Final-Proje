@@ -1,11 +1,49 @@
-import { useMemo } from 'react';
-import { Keyboard, ScrollView, StyleSheet, Text, View, Pressable } from 'react-native';
+import { useEffect, useMemo, useState } from 'react';
+import { Keyboard, RefreshControl, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useTheme } from '../context/ThemeContext';
 
 export default function MarketScreen() {
   const { colors } = useTheme();
   const styles = useMemo(() => createStyles(colors), [colors]);
+  const [rates, setRates] = useState([]);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
+  const [lastUpdated, setLastUpdated] = useState('');
+
+  const load = async () => {
+    setLoading(true);
+    setError('');
+    try {
+      const bases = ['USD', 'EUR', 'GBP'];
+      const fxResults = await Promise.all(
+        bases.map(async (base) => {
+          const res = await fetch(
+            `https://api.frankfurter.app/latest?from=${base}&to=TRY`
+          );
+          if (!res.ok) {
+            throw new Error(`Kur API hatasi (${base}): ${res.status}`);
+          }
+          const data = await res.json();
+          return {
+            base,
+            rate: data.rates?.TRY ?? null,
+          };
+        })
+      );
+
+      setRates(fxResults);
+      setLastUpdated(new Date().toLocaleString());
+    } catch (err) {
+      setError(String(err.message || err));
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    load();
+  }, []);
 
   return (
     <SafeAreaView style={styles.container}>
@@ -14,18 +52,34 @@ export default function MarketScreen() {
         keyboardShouldPersistTaps="handled"
         keyboardDismissMode="on-drag"
         onTouchStart={Keyboard.dismiss}
+        refreshControl={
+          <RefreshControl refreshing={loading} onRefresh={load} />
+        }
       >
         <View style={styles.content}>
-      {/* Piyasa ekraninin basit placeholder'i */}
-      {/* API entegrasyonu geldiginde bu alana canli kur listesi gelecek */}
-      {/* Altin ve doviz fiyatlari burada satir satir gosterilecek */}
-        <Text style={styles.title}>Piyasa</Text>
-        <Text style={styles.subtitle}>Altin ve doviz fiyatlari buraya.</Text>
+          {/* Piyasa ekraninin basit placeholder'i */}
+          <Text style={styles.title}>Piyasa</Text>
+          <Text style={styles.subtitle}>USD, EUR, GBP - TRY canli kurlar</Text>
 
-        <View style={styles.card}>
-          <Text style={styles.cardTitle}>Canli Kur Verileri</Text>
-          <Text style={styles.cardText}>API geldiginde liste burada gorunecek.</Text>
-        </View>
+          <View style={styles.card}>
+            <Text style={styles.cardTitle}>Canli Kur Verileri</Text>
+            {loading && <Text style={styles.cardText}>Yukleniyor...</Text>}
+            {error ? <Text style={styles.cardText}>{error}</Text> : null}
+            {!loading && !error && rates.length === 0 && (
+              <Text style={styles.cardText}>Veri yok.</Text>
+            )}
+            {!loading && !error && rates.map((item) => (
+              <View key={item.base} style={styles.rateRow}>
+                <Text style={styles.rateName}>{item.base} / TRY</Text>
+                <Text style={styles.rateValue}>
+                  {item.rate ? item.rate.toFixed(2) : '--'}
+                </Text>
+              </View>
+            ))}
+            {lastUpdated ? (
+              <Text style={styles.updatedText}>Guncel: {lastUpdated}</Text>
+            ) : null}
+          </View>
         </View>
       </ScrollView>
     </SafeAreaView>
@@ -74,5 +128,23 @@ const createStyles = (colors) => StyleSheet.create({
   },
   cardText: {
     color: colors.secondary,
+  },
+  rateRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    marginTop: 8,
+  },
+  rateName: {
+    color: colors.secondary,
+    fontWeight: '600',
+  },
+  rateValue: {
+    color: colors.text,
+    fontWeight: '700',
+  },
+  updatedText: {
+    marginTop: 10,
+    color: colors.secondary,
+    fontSize: 12,
   },
 });
